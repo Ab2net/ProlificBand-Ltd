@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ignite Your Brand. Captivate Your Audience. | ProlificBrand</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Light background */
+            color: #334155; /* Darker text */
+        }
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Live Chat Button */
+        #chat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4f46e5; /* Indigo-600 */
+            color: white;
+            border-radius: 9999px; /* Full rounded */
+            padding: 16px; /* p-4 */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.2s ease-in-out;
+        }
+        #chat-button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Live Chat Window */
+        #chat-window {
+            position: fixed;
+            bottom: 90px; /* Adjust based on button size */
+            right: 20px;
+            width: 320px;
+            height: 400px;
+            background-color: white;
+            border-radius: 12px; /* rounded-xl */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-2xl */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 999;
+            transform: scale(0.95); /* Slightly smaller when hidden */
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+        #chat-window.open {
+            transform: scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Chat Header */
+        #chat-header {
+            background-color: #4f46e5; /* Indigo-600 */
+            color: white;
+            padding: 16px; /* p-4 */
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #chat-header h3 {
+            font-weight: 600; /* font-semibold */
+            font-size: 1.125rem; /* text-lg */
+        }
+        #chat-close-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        /* Chat Messages Area */
+        #chat-messages {
+            flex-grow: 1;
+            padding: 16px; /* p-4 */
+            overflow-y: auto;
+            background-color: #f1f5f9; /* gray-100 */
+            border-bottom: 1px solid #e2e8f0; /* border-gray-200 */
+        }
+        .chat-message {
+            margin-bottom: 8px; /* mb-2 */
+            padding: 8px 12px; /* px-3 py-2 */
+            border-radius: 12px; /* rounded-lg */
+            max-width: 80%;
+        }
+        .chat-message.user {
+            background-color: #e0e7ff; /* indigo-100 */
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .chat-message.bot {
+            background-color: #cbd5e1; /* gray-300 */
+            align-self: flex-start;
+            margin-right: auto;
+        }
+
+        /* Chat Input Area */
+        #chat-input-area {
+            display: flex;
+            padding: 16px; /* p-4 */
+            background-color: white;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        #chat-input {
+            flex-grow: 1;
+            padding: 8px 12px; /* px-3 py-2 */
+            border: 1px solid #cbd5e1; /* border-gray-300 */
+            border-radius: 8px; /* rounded-lg */
+            margin-right: 8px; /* mr-2 */
+            outline: none;
+        }
+        #chat-send-button {
+            background-color: #4f46e5; /* Indigo-600 */
+            color: white;
+            padding: 8px 16px; /* px-4 py-2 */
+            border-radius: 8px; /* rounded-lg */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        #chat-send-button:hover {
+            background-color: #3730a3; /* Indigo-700 */
+        }
+
+        /* Responsive adjustments for chat window */
+        @media (max-width: 768px) {
+            #chat-window {
+                width: 90%;
+                max-width: 320px;
+                height: 70vh; /* Make it taller on small screens */
+                bottom: 10px;
+                right: 5%;
+                left: 5%;
+                margin: auto;
+            }
+            #chat-button {
+                bottom: 10px;
+                right: 10px;
+                padding: 12px; /* Smaller padding for mobile */
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-sm py-4 px-6 md:px-12 lg:px-24 sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Company Logo -->
+            <a href="#home" class="text-2xl font-bold text-indigo-700 rounded-lg p-2 hover:text-indigo-800 transition duration-300">
+                <span class="text-indigo-500">Prolific</span>Brand
+            </a>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-gray-600 hover:text-gray-900 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Desktop Navigation Links -->
+            <div class="hidden md:flex space-x-8">
+                <a href="#home" class="text-gray-600 hover:text-indigo-700 font-medium transition duration-300 rounded-md px-3 py-2">Home</a>
+                <a href="#services" class="text-gray-600 hover:text-indigo-700 font-medium transition duration-300 rounded-md px-3 py-2">Services</a>
+                <a href="#portfolio" class="text-gray-600 hover:text-indigo-700 font-medium transition duration-300 rounded-md px-3 py-2">Portfolio</a>
+                <a href="#about" class="text-gray-600 hover:text-indigo-700 font-medium transition duration-300 rounded-md px-3 py-2">About Us</a>
+                <a href="#contact" class="bg-indigo-600 text-white px-5 py-2 rounded-full shadow-md hover:bg-indigo-700 transition duration-300">Contact Us</a>
+            </div>
+        </div>
+
+        <!-- Mobile Menu (Hidden by default) -->
+        <div id="mobile-menu" class="hidden md:hidden mt-4 bg-white rounded-lg shadow-lg py-2">
+            <a href="#home" class="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-md">Home</a>
+            <a href="#services" class="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-md">Services</a>
+            <a href="#portfolio" class="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-md">Portfolio</a>
+            <a href="#about" class="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-md">About Us</a>
+            <a href="#contact" class="block px-4 py-2 text-indigo-600 hover:bg-gray-100 rounded-md">Contact Us</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative bg-gradient-to-r from-indigo-600 to-purple-700 text-white py-20 md:py-32 lg:py-48 overflow-hidden rounded-b-3xl shadow-lg">
+        <div class="container mx-auto px-6 md:px-12 lg:px-24 text-center relative z-10">
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-6 animate-fade-in-up">
+                Ignite Your Brand. <br class="hidden md:block">Captivate Your Audience.
+            </h1>
+            <p class="text-lg md:text-xl lg:text-2xl mb-10 max-w-3xl mx-auto opacity-90 animate-fade-in-up delay-200">
+                We are an advertising and branding company dedicated to crafting unforgettable experiences that drive growth and connect with your customers.
+            </p>
+            <a href="#services" class="inline-block bg-white text-indigo-700 px-8 py-4 rounded-full text-lg font-semibold shadow-xl hover:bg-gray-100 transform hover:scale-105 transition duration-300 ease-in-out animate-fade-in-up delay-400">
+                Explore Our Services
+            </a>
+        </div>
+        <!-- Background elements for visual appeal -->
+        <div class="absolute inset-0 z-0 opacity-10">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <circle cx="20" cy="80" r="15" fill="currentColor" class="text-indigo-400"></circle>
+                <circle cx="80" cy="20" r="20" fill="currentColor" class="text-purple-400"></circle>
+                <rect x="50" y="50" width="30" height="30" rx="8" ry="8" fill="currentColor" class="text-indigo-300"></rect>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-16 md:py-24 bg-gray-50 hidden">
+        <div class="container mx-auto px-6 md:px-12 lg:px-24">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">Our Core Services</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Service Card 1: Brand Strategy -->
+                <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2">
+                    <div class="text-indigo-600 mb-4">
+                        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3 text-center">Brand Strategy</h3>
+                    <p class="text-gray-600 text-center">Developing a clear, compelling brand identity that resonates with your target audience and stands out in the market.</p>
+                </div>
+
+                <!-- Service Card 2: Digital Marketing -->
+                <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2">
+                    <div class="text-indigo-600 mb-4">
+                        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16L2 12l4-4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3 text-center">Digital Marketing</h3>
+                    <p class="text-gray-600 text-center">Crafting data-driven online campaigns, from SEO and SEM to social media and content marketing, to maximize your reach.</p>
+                </div>
+
+                <!-- Service Card 3: Creative Design -->
+                <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2">
+                    <div class="text-indigo-600 mb-4">
+                        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3 text-center">Creative Design</h3>
+                    <p class="text-gray-600 text-center">Bringing your brand to life with stunning visuals, compelling graphics, and innovative design solutions for all platforms.</p>
+                </div>
+
+                <!-- Service Card 4: Content Creation -->
+                <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2">
+                    <div class="text-indigo-600 mb-4">
+                        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3 text-center">Content Creation</h3>
+                    <p class="text-gray-600 text-center">Producing engaging and valuable content, from captivating copy to dynamic video, that tells your brand's story effectively.</p>
+                </div>
+
+                <!-- Service Card 5: Public Relations -->
+                <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2">
+                    <div class="text-indigo-600 mb-4">
+                        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3 text-center">Public Relations</h3>
+                    <p class="text-gray-600 text-center">Building positive relationships with your audience and media to enhance your brand's reputation and visibility.</p>
+                </div>
+
+                <!-- Service Card 6: Web Development -->
+                <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2">
+                    <div class="text-indigo-600 mb-4">
+                        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-1.25-3M15 10V5a2 2 0 00-2-2H7a2 2 0 00-2 2v5m3 4v-3h2m-2 0h2m-2 0l3 3m-3-3l-3 3"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3 text-center">Web Development</h3>
+                    <p class="text-gray-600 text-center">Creating stunning, user-friendly, and highly functional websites that serve as the digital cornerstone of your brand.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="py-16 md:py-24 bg-white hidden">
+        <div class="container mx-auto px-6 md:px-12 lg:px-24">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">Our Recent Work</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Portfolio Item 1 -->
+                <div class="bg-gray-50 rounded-xl shadow-lg overflow-hidden group hover:shadow-xl transition duration-300">
+                    <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Brand Refresh Project" class="w-full h-56 object-cover transform group-hover:scale-105 transition duration-500">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Project Alpha: Brand Refresh</h3>
+                        <p class="text-gray-600 text-sm">Complete brand identity overhaul for a tech startup, including logo, guidelines, and website design.</p>
+                        <a href="#" class="mt-4 inline-block text-indigo-600 hover:text-indigo-800 font-medium transition duration-300">View Case Study &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- Portfolio Item 2 -->
+                <div class="bg-gray-50 rounded-xl shadow-lg overflow-hidden group hover:shadow-xl transition duration-300">
+                    <img src="https://images.unsplash.com/photo-1517292987719-0369a794cd83?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Digital Launch Campaign" class="w-full h-56 object-cover transform group-hover:scale-105 transition duration-500">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Campaign Beta: Digital Launch</h3>
+                        <p class="text-gray-600 text-sm">Successful digital marketing campaign for a new product, achieving 200% ROI in the first quarter.</p>
+                        <a href="#" class="mt-4 inline-block text-indigo-600 hover:text-indigo-800 font-medium transition duration-300">View Case Study &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- Portfolio Item 3 -->
+                <div class="bg-gray-50 rounded-xl shadow-lg overflow-hidden group hover:shadow-xl transition duration-300">
+                    <img src="https://images.unsplash.com/photo-1621609764095-f97e9d5797b5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Packaging Design" class="w-full h-56 object-cover transform group-hover:scale-105 transition duration-500">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Design Gamma: Packaging & Print</h3>
+                        <p class="text-gray-600 text-sm">Innovative packaging design and print collateral for a gourmet food brand, enhancing shelf appeal.</p>
+                        <a href="#" class="mt-4 inline-block text-indigo-600 hover:text-indigo-800 font-medium transition duration-300">View Case Study &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- Portfolio Item 4 -->
+                <div class="bg-gray-50 rounded-xl shadow-lg overflow-hidden group hover:shadow-xl transition duration-300">
+                    <img src="https://images.unsplash.com/photo-1487017159836-b146fc7aa9fd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="E-commerce Website" class="w-full h-56 object-cover transform group-hover:scale-105 transition duration-500">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Web Solution: E-commerce Site</h3>
+                        <p class="text-gray-600 text-sm">Development of a responsive and high-converting e-commerce website for a fashion retailer.</p>
+                        <a href="#" class="mt-4 inline-block text-indigo-600 hover:text-indigo-800 font-medium transition duration-300">View Case Study &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- Portfolio Item 5: Content Strategy with Videos -->
+                <div class="bg-gray-50 rounded-xl shadow-lg overflow-hidden group hover:shadow-xl transition duration-300">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Content Strategy: Blog & Video</h3>
+                        <p class="text-gray-600 text-sm mb-4">Creation of an engaging content strategy, including blog posts and explainer videos, for a B2B service. Check out some samples below:</p>
+
+                        <!-- Sample Video 1 -->
+                        <div class="mb-4">
+                            <h4 class="font-medium text-gray-800 mb-2">Sample Video 1: Explainer Video</h4>
+                            <video controls class="w-full h-auto rounded-lg shadow-md">
+                                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <p class="text-gray-500 text-xs mt-1">A short explainer video showcasing a product feature.</p>
+                        </div>
+
+                        <!-- Sample Video 2 -->
+                        <div class="mb-4">
+                            <h4 class="font-medium text-gray-800 mb-2">Sample Video 2: Promotional Clip</h4>
+                            <video controls class="w-full h-auto rounded-lg shadow-md">
+                                <source src="https://www.w3schools.com/html/movie.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <p class="text-gray-500 text-xs mt-1">A brief promotional clip for a service launch.</p>
+                        </div>
+
+                        <a href="#" class="mt-4 inline-block text-indigo-600 hover:text-indigo-800 font-medium transition duration-300">View Case Study &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- Portfolio Item 6 -->
+                <div class="bg-gray-50 rounded-xl shadow-lg overflow-hidden group hover:shadow-xl transition duration-300">
+                    <img src="https://images.unsplash.com/photo-1497215729113-d15ee761a66a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="PR Campaign" class="w-full h-56 object-cover transform group-hover:scale-105 transition duration-500">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">PR Campaign: Media Outreach</h3>
+                        <p class="text-gray-600 text-sm">Successful public relations campaign securing features in top industry publications and news outlets.</p>
+                        <a href="#" class="mt-4 inline-block text-indigo-600 hover:text-indigo-800 font-medium transition duration-300">View Case Study &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about" class="py-16 md:py-24 bg-gray-50 hidden">
+        <div class="container mx-auto px-6 md:px-12 lg:px-24 flex flex-col lg:flex-row items-center gap-12">
+            <div class="lg:w-1/2">
+                <img src="https://placehold.co/800x500/CFFAFE/0E7490?text=Our+Team" alt="Our Team Working" class="rounded-3xl shadow-xl w-full h-auto object-cover">
+            </div>
+            <div class="lg:w-1/2 text-center lg:text-left">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">About ProlificBrand</h2>
+                <p class="text-lg text-gray-700 mb-6 leading-relaxed">
+                    At ProlificBrand, we believe in the power of a strong narrative. Founded in [Year], our mission has been to empower businesses of all sizes to connect meaningfully with their audiences. We're a team of passionate strategists, designers, marketers, and storytellers dedicated to transforming your vision into market dominance.
+                </p>
+                <p class="text-lg text-gray-700 leading-relaxed">
+                    Our approach is collaborative, data-driven, and relentlessly creative. We dive deep into your brand's essence, understand your goals, and craft bespoke solutions that not only look good but deliver tangible results. We're not just building brands; we're forging legacies.
+                </p>
+                <a href="#contact" class="inline-block mt-8 bg-indigo-600 text-white px-7 py-3 rounded-full shadow-md hover:bg-indigo-700 transition duration-300 transform hover:scale-105">
+                    Meet Our Team
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-16 md:py-24 bg-white hidden">
+        <div class="container mx-auto px-6 md:px-12 lg:px-24">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">What Our Clients Say</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-gray-50 p-8 rounded-xl shadow-lg border-t-4 border-indigo-500">
+                    <p class="text-lg text-gray-700 italic mb-6">"ProlificBrand completely transformed our online presence. Their strategic insights and creative execution led to a significant increase in our brand engagement and sales. Highly recommend!"</p>
+                    <div class="flex items-center">
+                        <img src="https://placehold.co/60x60/E0E7FF/4F46E5?text=JD" alt="Client Avatar" class="w-14 h-14 rounded-full mr-4 object-cover">
+                        <div>
+                            <p class="font-semibold text-gray-900">Ebitu Daniel</p>
+                            <p class="text-gray-600 text-sm">CEO, Tech Innovations</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="bg-gray-50 p-8 rounded-xl shadow-lg border-t-4 border-purple-500">
+                    <p class="text-lg text-gray-700 italic mb-6">"Working with ProlificBrand was a seamless experience. They understood our vision perfectly and delivered a brand identity that truly captured our essence. Exceptional talent!"</p>
+                    <div class="flex items-center">
+                        <img src="https://placehold.co/60x60/D1FAE5/065F46?text=SM" alt="Client Avatar" class="w-14 h-14 rounded-full mr-4 object-cover">
+                        <div>
+                            <p class="font-semibold text-gray-900">Joy E.</p>
+                            <p class="text-gray-600 text-sm">Marketing Director, JE-Shoes</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="bg-gray-50 p-8 rounded-xl shadow-lg border-t-4 border-pink-500">
+                    <p class="text-lg text-gray-700 italic mb-6">"Their team's creativity and dedication are unparalleled. Our new website and digital campaigns have exceeded all expectations. ProlificBrand is our go-to for all things branding."</p>
+                    <div class="flex items-center">
+                        <img src="https://placehold.co/60x60/FFE4E6/BE185D?text=RL" alt="Client Avatar" class="w-14 h-14 rounded-full mr-4 object-cover">
+                        <div>
+                            <p class="font-semibold text-gray-900">Rev. Eshiet.</p>
+                            <p class="text-gray-600 text-sm">Consultant, David Youngs Foundations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 md:py-24 bg-gradient-to-r from-indigo-700 to-purple-800 text-white rounded-t-3xl shadow-lg hidden">
+        <div class="container mx-auto px-6 md:px-12 lg:px-24 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to Elevate Your Brand?</h2>
+            <p class="text-lg md:text-xl mb-10 max-w-2xl mx-auto opacity-90">
+                Let's discuss your project and discover how ProlificBrand can help you achieve your business goals.
+            </p>
+
+            <div class="max-w-xl mx-auto bg-white p-8 md:p-10 rounded-xl shadow-2xl text-gray-800">
+                <form class="space-y-6">
+                    <div>
+                        <label for="name" class="block text-left text-gray-700 text-sm font-medium mb-2">Your Name</label>
+                        <input type="text" id="name" name="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-200" placeholder="John Doe" required>
+                    </div>
+                    <div>
+                        <label for="email" class="block text-left text-gray-700 text-sm font-medium mb-2">Your Email</label>
+                        <input type="email" id="email" name="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-200" placeholder="john.doe@example.com" required>
+                    </div>
+                    <div>
+                        <label for="subject" class="block text-left text-gray-700 text-sm font-medium mb-2">Subject</label>
+                        <input type="text" id="subject" name="subject" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-200" placeholder="Project Inquiry, Partnership, etc." required>
+                    </div>
+                    <div>
+                        <label for="message" class="block text-left text-gray-700 text-sm font-medium mb-2">Your Message</label>
+                        <textarea id="message" name="message" rows="5" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-200" placeholder="Tell us about your project or inquiry..." required></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white px-6 py-3 rounded-full text-lg font-semibold shadow-md hover:bg-indigo-700 transform hover:scale-105 transition duration-300 ease-in-out">
+                        Send Message
+                    </button>
+                </form>
+            </div>
+
+            <div class="mt-12 text-center">
+                <p class="text-xl font-semibold mb-4">Or Reach Us Directly:</p>
+                <p class="text-lg mb-2">Email: <a href="mailto:info@prolicBrand.com" class="underline hover:text-gray-200">info@prolificbrand.com</a></p>
+                <p class="text-lg mb-2">Phone: <a href="tel:+2348084049411" class="underline hover:text-gray-200">+234 808 404 9411</a></p>
+                <p class="text-lg">Address: No. 4 Ondo Street, Off Oshuntokun Avenue, Old Bodija, Ibadan, Nigeria.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-10 px-6 md:px-12 lg:px-24">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+            <div class="mb-4 md:mb-0">
+                <a href="#home" class="text-2xl font-bold text-white rounded-lg p-2">
+                    <span class="text-indigo-400">Prolific</span>Brand
+                </a>
+                <p class="text-sm mt-2">&copy; 2025 ProlificBrand. All rights reserved.</p>
+            </div>
+            <div class="flex space-x-6">
+                <a href="https://www.facebook.com/ebitu.daniel" class="text-gray-400 hover:text-white transition duration-300">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.776-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+                <!-- X (Twitter) Logo SVG -->
+                <a href="https://www.x.com/ebitu_daniel" class="text-gray-400 hover:text-white transition duration-300">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 1200 1227" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L890.462 1226.37H1200L714.163 519.284ZM569.166 687.828L521.697 619.934L144.011 79.694H306.615L611.412 515.685L658.881 583.579L1055.03 1146.37H892.427L569.166 687.828Z"/>
+                    </svg>
+                </a>
+                <a href="https://www.linkedin.com/in/ebitu-daniel" class="text-gray-400 hover:text-white transition duration-300">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M19 0H5c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zm-11 19H5v-9h3v9zm-1.5-9.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13 9H16v-4c0-1.1-.9-2-2-2s-2 .9-2 2v4h-3V10h3v1.79c.67-1.22 1.9-2.01 3.31-2.01 2.2 0 3.69 1.77 3.69 4.19v5.03z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Live Chat Button -->
+    <button id="chat-button" aria-label="Open Live Chat">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+        </svg>
+    </button>
+
+    <!-- Live Chat Window -->
+    <div id="chat-window" class="hidden">
+        <div id="chat-header">
+            <h3>Live Chat Support</h3>
+            <button id="chat-close-button">&times;</button>
+        </div>
+        <div id="chat-messages">
+            <!-- Chat messages will be appended here -->
+            <div class="chat-message bot">Hello! How can I help you today?</div>
+        </div>
+        <div id="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Type your message...">
+            <button id="chat-send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Smooth scrolling for navigation links and section visibility control
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                
+                // Prevent default behavior for all hash links
+                e.preventDefault();
+
+                const targetElement = document.querySelector(href);
+
+                if (targetElement) {
+                    // Hide all main content sections
+                    document.querySelectorAll('section').forEach(section => {
+                        section.classList.add('hidden');
+                    });
+
+                    // Show the target section
+                    targetElement.classList.remove('hidden');
+                    
+                    // Scroll to the target section
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+
+                // Close mobile menu if open
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+
+        // Initial hide of all sections except home when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('section:not(#home)').forEach(section => {
+                section.classList.add('hidden');
+            });
+        });
+
+        // Toggle mobile menu visibility
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when clicking outside (optional, but good UX)
+        document.addEventListener('click', (event) => {
+            if (!mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target) && !mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+
+        // Live Chat functionality
+        const chatButton = document.getElementById('chat-button');
+        const chatWindow = document.getElementById('chat-window');
+        const chatCloseButton = document.getElementById('chat-close-button');
+        const chatInput = document.getElementById('chat-input');
+        const chatSendButton = document.getElementById('chat-send-button');
+        const chatMessages = document.getElementById('chat-messages');
+
+        chatButton.addEventListener('click', () => {
+            chatWindow.classList.toggle('hidden');
+            chatWindow.classList.toggle('open'); // Add/remove 'open' class for transitions
+            if (chatWindow.classList.contains('open')) {
+                chatInput.focus(); // Focus input when chat opens
+            }
+        });
+
+        chatCloseButton.addEventListener('click', () => {
+            chatWindow.classList.add('hidden');
+            chatWindow.classList.remove('open');
+        });
+
+        chatSendButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            const messageText = chatInput.value.trim();
+            if (messageText !== '') {
+                // Append user message
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.classList.add('chat-message', 'user');
+                userMessageDiv.textContent = messageText;
+                chatMessages.appendChild(userMessageDiv);
+
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Clear input
+                chatInput.value = '';
+
+                // Placeholder for bot response (simulated)
+                setTimeout(() => {
+                    const botMessageDiv = document.createElement('div');
+                    botMessageDiv.classList.add('chat-message', 'bot');
+                    botMessageDiv.textContent = "Thank you for your message! We'll get back to you shortly.";
+                    chatMessages.appendChild(botMessageDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000); // Simulate a delay for bot response
+            }
+        }
+    </script>
+</body>
+</html>
